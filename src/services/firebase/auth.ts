@@ -16,13 +16,25 @@ import {
 import { doc, getDoc, onSnapshot, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore';
 import { FirebaseError } from 'firebase/app';
 import type { AppUser, AuthService } from '../types';
-import { ADMIN_EMAIL, fb, toKoreanError } from './app';
+import { ADMIN_EMAIL, fb } from './app';
 import { toAppUser } from './convert';
 
 /** 지금 로그인한 사용자 (다른 서비스에서 작성자 이름 등을 채울 때 사용) */
 let current: AppUser | null = null;
 export function getCurrentAppUser(): AppUser | null {
   return current;
+}
+
+/** Firestore에서 사용자 정보를 읽고 쓰다 실패했을 때의 안내 문장 */
+function userDocErrorMessage(e: unknown): string {
+  const code = e instanceof FirebaseError ? e.code : '';
+  if (code === 'permission-denied')
+    return '구글 로그인은 되었지만, 데이터베이스가 사용자 정보 저장을 거부했습니다. Firebase 콘솔 → Firestore Database → 규칙 탭에 firestore.rules 내용을 붙여넣고 [게시]했는지 확인해 주세요.';
+  if (code === 'not-found' || code === 'failed-precondition')
+    return '구글 로그인은 되었지만, Firestore 데이터베이스를 찾을 수 없습니다. Firebase 콘솔 → Firestore Database에서 데이터베이스를 만들어 주세요.';
+  if (code === 'unavailable')
+    return '구글 로그인은 되었지만, 데이터베이스 서버에 연결할 수 없습니다. 인터넷 연결을 확인한 뒤 새로고침해 주세요.';
+  return `구글 로그인은 되었지만, 사용자 정보를 불러오지 못했습니다. (${code || (e instanceof Error ? e.message : '알 수 없는 오류')})`;
 }
 
 function isAdminEmail(u: User): boolean {
@@ -53,8 +65,12 @@ export const firebaseAuthService: AuthService = {
   isDemo: false,
   demoAccounts: [],
 
-  onAuthStateChanged(callback) {
+  onAuthStateChanged(callback, onError) {
     const { auth, db } = fb();
+    const reportError = (e: unknown) => {
+      console.error('[로그인] 사용자 정보 처리 실패', e);
+      onError?.(userDocErrorMessage(e));
+    };
     let unsubDoc: (() => void) | undefined;
 
     const unsubAuth = fbOnAuthStateChanged(auth, async (fbUser) => {
@@ -68,7 +84,8 @@ export const firebaseAuthService: AuthService = {
       try {
         await ensureUserDoc(fbUser);
       } catch (e) {
-        console.error('사용자 정보를 만들지 못했습니다.', e);
+        // 실패해도 아래 구독에서 다시 확인합니다. (원인을 화면에 알립니다)
+        reportError(e);
       }
       // 역할이 바뀌면(승인 등) 바로 화면에 반영되도록 실시간 구독
       unsubDoc = onSnapshot(
@@ -82,10 +99,11 @@ export const firebaseAuthService: AuthService = {
             return;
           }
           current = toAppUser(snap);
+          onError?.(null);
           callback(current);
         },
         (err) => {
-          console.error(err);
+          reportError(err);
           current = null;
           callback(null);
         },
@@ -111,9 +129,18 @@ export const firebaseAuthService: AuthService = {
         // 팝업이 차단되면 페이지 이동 방식으로 다시 시도합니다.
         if (e.code === 'auth/popup-blocked') return signInWithRedirect(auth, provider);
         if (e.code === 'auth/unauthorized-domain')
-          throw new Error('이 주소는 Firebase 승인된 도메인에 등록되어 있지 않습니다. (Authentication > 설정 > 승인된 도메인)');
+          throw new Error(
+            `이 주소(${window.location.hostname})는 Firebase 승인된 도메인에 등록되어 있지 않습니다.\nFirebase 콘솔 → Authentication → 설정 → 승인된 도메인에 이 주소를 추가해 주세요.`,
+          );
+        if (e.code === 'auth/operation-not-allowed')
+          throw new Error('Firebase에서 구글 로그인이 사용 설정되어 있지 않습니다. (Authentication → 로그인 방법 → Google 사용 설정)');
+        if (e.code === 'auth/network-request-failed')
+          throw new Error('네트워크 오류로 로그인하지 못했습니다. 인터넷 연결을 확인해 주세요.');
+        if (e.code === 'auth/invalid-api-key' || e.code === 'auth/api-key-not-valid.-please-pass-a-valid-api-key.')
+          throw new Error('Firebase API 키가 올바르지 않습니다. Netlify 환경변수 VITE_FIREBASE_API_KEY 값을 확인해 주세요.');
       }
-      throw toKoreanError(e);
+      console.error('[로그인] 구글 로그인 실패', e);
+      throw new Error(`로그인하지 못했습니다. (${e instanceof FirebaseError ? e.code : '알 수 없는 오류'})`);
     }
   },
 

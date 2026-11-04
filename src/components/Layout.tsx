@@ -1,7 +1,7 @@
 /** 모든 페이지의 공통 틀: 상단 내비게이션 + 본문 + 하단 푸터 */
 import { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router';
-import { Building2, Mail, MapPin, Menu, Moon, Sun, X } from 'lucide-react';
+import { AlertTriangle, Building2, Mail, MapPin, Menu, Moon, Sun, X } from 'lucide-react';
 import { site } from '../data/site';
 import { useAuth } from '../auth/useAuth';
 import { useTheme } from '../theme/useTheme';
@@ -53,7 +53,7 @@ export function Logo({ light = false }: { light?: boolean }) {
 
 export function Layout() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const { user, isDemo } = useAuth();
+  const { user, isDemo, authError, signOut } = useAuth();
   const { theme, toggle } = useTheme();
   const location = useLocation();
 
@@ -128,6 +128,31 @@ export function Layout() {
           </div>
         )}
       </header>
+
+      {authError && (
+        <div className="border-b border-red-200 bg-red-50 text-red-800 dark:border-red-900 dark:bg-red-950/60 dark:text-red-200" role="alert">
+          <Container className="flex flex-col gap-3 py-4 sm:flex-row sm:items-start sm:justify-between">
+            <p className="flex gap-2 text-sm leading-relaxed">
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
+              <span>{authError}</span>
+            </p>
+            <div className="flex shrink-0 gap-2">
+              <button
+                onClick={() => window.location.reload()}
+                className="rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-red-700 ring-1 ring-red-200 hover:bg-red-100 dark:bg-transparent dark:text-red-200 dark:ring-red-800"
+              >
+                새로고침
+              </button>
+              <button
+                onClick={() => void signOut()}
+                className="rounded-lg px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100 dark:text-red-200 dark:hover:bg-red-900/40"
+              >
+                로그아웃
+              </button>
+            </div>
+          </Container>
+        </div>
+      )}
 
       <main className="relative z-10 flex-1">
         <Outlet />

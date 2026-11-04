@@ -81,8 +81,12 @@ export interface AuthService {
   readonly isDemo: boolean;
   /** 데모 모드에서 고를 수 있는 계정 목록 (Firebase 구현에서는 빈 배열) */
   readonly demoAccounts: DemoAccount[];
-  /** 로그인 상태가 바뀔 때마다 callback을 호출합니다. 반환값은 구독 해제 함수입니다. */
-  onAuthStateChanged(callback: (user: AppUser | null) => void): () => void;
+  /**
+   * 로그인 상태가 바뀔 때마다 callback을 호출합니다. 반환값은 구독 해제 함수입니다.
+   * 로그인 과정에서 문제가 생기면 onError로 화면에 보여 줄 안내 문장을 전달합니다.
+   * (문제가 해결되면 onError(null)로 안내를 지웁니다.)
+   */
+  onAuthStateChanged(callback: (user: AppUser | null) => void, onError?: (message: string | null) => void): () => void;
   /** 로그인. 데모 모드에서는 demoRole로 어떤 가짜 사용자로 로그인할지 고릅니다. */
   signIn(opts?: { demoRole?: Role }): Promise<void>;
   signOut(): Promise<void>;

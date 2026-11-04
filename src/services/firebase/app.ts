@@ -4,8 +4,8 @@
  * 값이 비어 있으면 사이트는 자동으로 데모 모드로 동작합니다. (src/services/index.ts 참고)
  */
 import { initializeApp, type FirebaseApp } from 'firebase/app';
-import { getAuth, type Auth } from 'firebase/auth';
-import { getFirestore, type Firestore } from 'firebase/firestore';
+import { connectAuthEmulator, getAuth, GoogleAuthProvider, signInWithCredential, type Auth } from 'firebase/auth';
+import { connectFirestoreEmulator, getFirestore, type Firestore } from 'firebase/firestore';
 import { FirebaseError } from 'firebase/app';
 
 const env = import.meta.env;
@@ -32,6 +32,18 @@ export function fb() {
   if (!cached) {
     const app = initializeApp(firebaseConfig);
     cached = { app, auth: getAuth(app), db: getFirestore(app) };
+    // 개발자용: VITE_FIREBASE_EMULATOR=true 이면 내 컴퓨터의 Firebase 에뮬레이터에 연결합니다.
+    if (import.meta.env.VITE_FIREBASE_EMULATOR === 'true') {
+      connectAuthEmulator(cached.auth, 'http://127.0.0.1:9099', { disableWarnings: true });
+      connectFirestoreEmulator(cached.db, '127.0.0.1', 8080);
+      // 자동 테스트용: 에뮬레이터에서만 가짜 구글 계정으로 바로 로그인
+      const auth = cached.auth;
+      (window as unknown as Record<string, unknown>).__emulatorSignIn = (email: string, name: string) =>
+        signInWithCredential(
+          auth,
+          GoogleAuthProvider.credential(JSON.stringify({ sub: email, email, email_verified: true, name })),
+        );
+    }
   }
   return cached;
 }
