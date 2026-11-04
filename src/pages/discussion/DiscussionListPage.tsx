@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import { ChevronRight, PenSquare } from 'lucide-react';
-import { discussionService, type Category, type Post } from '../../services';
+import { discussionService, isAdmin, type Category, type Post } from '../../services';
+import { useAuth } from '../../auth/useAuth';
 import { usePageTitle } from '../../hooks/usePageTitle';
 import {
   Avatar,
@@ -21,6 +22,7 @@ const filters: (Category | undefined)[] = [undefined, 'research', 'course', 'not
 
 export function DiscussionListPage() {
   usePageTitle('토론 게시판');
+  const { user } = useAuth();
   const [params, setParams] = useSearchParams();
   const raw = params.get('category');
   const category = raw && raw in categoryLabels ? (raw as Category) : undefined;
@@ -104,7 +106,17 @@ export function DiscussionListPage() {
       {loading ? (
         <Spinner />
       ) : posts.length === 0 ? (
-        <EmptyState>아직 글이 없습니다. 첫 글을 남겨 보세요!</EmptyState>
+        <EmptyState>
+          아직 글이 없습니다. 첫 글을 남겨 보세요!
+          {isAdmin(user) && !category && (
+            <p className="mt-3 text-sm">
+              <Link to="/admin" className="font-semibold text-brand-700 hover:underline dark:text-brand-300">
+                관리자 페이지
+              </Link>
+              에서 안내 글을 한 번에 등록할 수 있습니다.
+            </p>
+          )}
+        </EmptyState>
       ) : (
         <ul className="divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm dark:divide-slate-800 dark:border-slate-800 dark:bg-slate-900">
           {posts.map((p) => (
