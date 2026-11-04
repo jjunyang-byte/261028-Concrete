@@ -128,6 +128,58 @@ npm run dev
 
 Firebase 설정 값은 `.env.production` 파일에 들어 있어서 **Netlify에 환경변수를 따로 넣지 않아도 됩니다.**
 (이 값들은 비밀번호가 아니라 원래 브라우저에 공개되는 값입니다. 데이터는 보안 규칙이 지킵니다.)
+다만 Netlify에서 값을 관리하고 싶다면 아래 방법으로 넣을 수 있고, **Netlify에 넣은 값이 `.env.production`보다 우선**합니다.
+
+### Netlify 환경변수 설정 방법 (선택)
+
+**넣을 값 (5개)**
+
+| 이름 (Key) | 값 (Value) |
+|---|---|
+| `VITE_FIREBASE_API_KEY` | `AIzaSyAe_7hCUjus3q7w51jRZ3dFyt-V4ojS8hw` |
+| `VITE_FIREBASE_AUTH_DOMAIN` | `concrete-7fb71.firebaseapp.com` |
+| `VITE_FIREBASE_PROJECT_ID` | `concrete-7fb71` |
+| `VITE_FIREBASE_APP_ID` | `1:373612679034:web:18ac6d1ba9aca277f490c3` |
+| `VITE_ADMIN_EMAIL` | `junrhkd@gmail.com` |
+
+> 값은 Firebase 콘솔 → ⚙️ 프로젝트 설정 → 일반 → **내 앱**의 `firebaseConfig`에서도 확인할 수 있습니다.
+> (`apiKey`, `authDomain`, `projectId`, `appId` 항목. `storageBucket`, `messagingSenderId`, `measurementId`는 필요 없습니다.)
+
+**한 개씩 넣기**
+
+1. [app.netlify.com](https://app.netlify.com/)에 로그인 → 이 사이트를 클릭합니다.
+2. 왼쪽 메뉴 **Site configuration** → **Environment variables**를 엽니다.
+3. **Add a variable** → **Add a single variable**을 누릅니다.
+4. **Key**에 이름(예: `VITE_FIREBASE_API_KEY`), **Values**에 값을 붙여넣습니다.
+   - 앞뒤에 빈칸이나 따옴표(`"`)가 들어가지 않게 주의하세요.
+   - **Scopes**는 기본값(All scopes) 그대로 두거나, 최소한 **Builds**가 선택되어 있어야 합니다.
+   - **Values**는 "Same value for all deploy contexts"(모든 배포에 같은 값) 그대로 둡니다.
+   - ⚠️ **"Contains secret values"(비밀 값) 체크는 하지 마세요.** 이 값들은 사이트 파일에 그대로 들어가는 것이 정상이라,
+     비밀 값으로 표시하면 Netlify의 비밀 값 검사가 배포를 실패시킵니다.
+5. **Create variable**을 누릅니다. 나머지 4개도 같은 방법으로 추가합니다.
+
+**한 번에 넣기 (더 빠름)**
+
+3번에서 **Add a variable → Import from a .env file**을 고르고, 아래 내용을 통째로 붙여넣은 뒤 **Import variables**를 누릅니다.
+
+```
+VITE_FIREBASE_API_KEY=AIzaSyAe_7hCUjus3q7w51jRZ3dFyt-V4ojS8hw
+VITE_FIREBASE_AUTH_DOMAIN=concrete-7fb71.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=concrete-7fb71
+VITE_FIREBASE_APP_ID=1:373612679034:web:18ac6d1ba9aca277f490c3
+VITE_ADMIN_EMAIL=junrhkd@gmail.com
+```
+
+**넣은 뒤 꼭 다시 배포하기**
+
+환경변수는 사이트를 **만들 때(빌드)** 들어가므로, 값을 넣거나 바꾼 뒤에는 다시 배포해야 반영됩니다.
+왼쪽 메뉴 **Deploys** → 오른쪽 **Trigger deploy** → **Deploy site**를 누르세요.
+
+**잘 됐는지 확인**
+
+배포된 사이트 오른쪽 위가 **"구글 로그인"** 버튼이고, 눌렀을 때 구글 계정 선택 창이 뜨면 정상입니다.
+로그인 창에서 오류(예: `api-key-not-valid`, `invalid-api-key`)가 나면 Netlify에 넣은 **값**에 오타나 빈칸이 있는 것이니 다시 확인하세요.
+(이름(Key)을 틀리게 적으면 그 변수는 무시되고 `.env.production`의 값이 대신 쓰입니다.)
 
 `netlify.toml`에는 `/research` 같은 주소로 바로 들어가거나 새로고침해도 404가 나지 않도록 하는 설정도 들어 있습니다.
 
