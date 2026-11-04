@@ -62,9 +62,9 @@ export function LoginButton({ onDone }: { onDone?: () => void }) {
       {open && (
         <div
           role="menu"
-          className="absolute left-0 z-50 mt-2 w-64 lg:left-auto lg:right-0 overflow-hidden rounded-lg border border-slate-200 bg-white text-left shadow-lg dark:border-slate-700 dark:bg-slate-800"
+          className="animate-fade-up absolute left-0 z-50 mt-2 w-72 overflow-hidden rounded-2xl border border-slate-200 bg-white p-1.5 text-left shadow-xl shadow-slate-900/10 lg:right-0 lg:left-auto dark:border-slate-700 dark:bg-slate-900"
         >
-          <p className="border-b border-slate-200 px-3 py-2 text-xs text-slate-500 dark:border-slate-700 dark:text-slate-400">
+          <p className="px-3 pt-2 pb-1.5 text-xs font-medium text-slate-500 dark:text-slate-400">
             어떤 역할로 둘러볼까요?
           </p>
           {authService.demoAccounts.map((a) => (
@@ -72,9 +72,9 @@ export function LoginButton({ onDone }: { onDone?: () => void }) {
               key={a.role}
               role="menuitem"
               onClick={() => doSignIn(a.role)}
-              className="block w-full px-3 py-2 text-left hover:bg-slate-100 dark:hover:bg-slate-700"
+              className="block w-full rounded-xl px-3 py-2.5 text-left transition hover:bg-brand-50 dark:hover:bg-slate-800"
             >
-              <span className="block text-sm font-medium">{a.label}</span>
+              <span className="block text-sm font-semibold">{a.label}</span>
               <span className="block text-xs text-slate-500 dark:text-slate-400">{a.description}</span>
             </button>
           ))}

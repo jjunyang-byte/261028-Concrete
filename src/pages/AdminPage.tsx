@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Check, X } from 'lucide-react';
+import { Check, UserCheck, X } from 'lucide-react';
 import { userService, type AppUser } from '../services';
 import { usePageTitle } from '../hooks/usePageTitle';
-import { buttonClass, ErrorMessage, errorText, formatDate, PageHeader, Spinner } from '../components/ui';
+import { Avatar, buttonClass, EmptyState, ErrorMessage, errorText, formatDate, Page, Spinner } from '../components/ui';
 
 export function AdminPage() {
   usePageTitle('관리자');
@@ -37,24 +37,32 @@ export function AdminPage() {
   };
 
   return (
-    <div>
-      <PageHeader title="관리자" description="가입을 신청한 사용자를 승인하거나 거절합니다." />
+    <Page eyebrow="Admin" title="관리자" description="가입을 신청한 사용자를 승인하거나 거절합니다.">
       {error && <ErrorMessage message={error} />}
-      <h2 className="mb-3 text-lg font-bold">가입 대기 중인 사용자 {users ? `(${users.length})` : ''}</h2>
+      <h2 className="mb-5 flex items-center gap-2 text-lg font-bold tracking-tight">
+        <UserCheck className="h-5 w-5 text-brand-600 dark:text-brand-400" />
+        가입 대기 중인 사용자
+        {users && (
+          <span className="rounded-full bg-brand-50 px-2.5 py-0.5 text-sm text-brand-700 dark:bg-brand-950 dark:text-brand-300">
+            {users.length}
+          </span>
+        )}
+      </h2>
       {users === null ? (
         <Spinner />
       ) : users.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-slate-300 p-8 text-center text-slate-500 dark:border-slate-700">
-          대기 중인 사용자가 없습니다.
-        </p>
+        <EmptyState>대기 중인 사용자가 없습니다.</EmptyState>
       ) : (
-        <ul className="divide-y divide-slate-200 overflow-hidden rounded-xl border border-slate-200 bg-white dark:divide-slate-700 dark:border-slate-700 dark:bg-slate-800">
+        <ul className="divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm dark:divide-slate-800 dark:border-slate-800 dark:bg-slate-900">
           {users.map((u) => (
-            <li key={u.uid} className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
-              <div className="min-w-0">
-                <p className="font-medium">{u.displayName}</p>
-                <p className="break-all text-sm text-slate-500">{u.email}</p>
-                <p className="text-xs text-slate-400">신청일 {formatDate(u.createdAt)}</p>
+            <li key={u.uid} className="flex flex-col gap-4 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+              <div className="flex min-w-0 items-center gap-4">
+                <Avatar name={u.displayName} />
+                <div className="min-w-0">
+                  <p className="font-semibold">{u.displayName}</p>
+                  <p className="text-sm break-all text-slate-500">{u.email}</p>
+                  <p className="text-xs text-slate-400">신청일 {formatDate(u.createdAt)}</p>
+                </div>
               </div>
               <div className="flex gap-2">
                 <button className={buttonClass.primary} disabled={busyUid === u.uid} onClick={() => decide(u, true)}>
@@ -68,6 +76,6 @@ export function AdminPage() {
           ))}
         </ul>
       )}
-    </div>
+    </Page>
   );
 }

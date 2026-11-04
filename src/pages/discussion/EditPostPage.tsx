@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router';
 import { canModify, discussionService, type Post } from '../../services';
 import { useAuth } from '../../auth/useAuth';
 import { usePageTitle } from '../../hooks/usePageTitle';
-import { ErrorMessage, errorText, PageHeader, Spinner } from '../../components/ui';
+import { Container, ErrorMessage, errorText, Page, Spinner } from '../../components/ui';
 import { PostForm } from './PostForm';
 import { NotFoundPage } from '../NotFoundPage';
 
@@ -22,14 +22,18 @@ export function EditPostPage() {
       .catch((e) => setError(errorText(e)));
   }, [postId]);
 
-  if (error) return <ErrorMessage message={error} />;
+  if (error) return <Container className="py-12"><ErrorMessage message={error} /></Container>;
   if (post === undefined) return <Spinner />;
   if (post === null) return <NotFoundPage />;
-  if (!canModify(user, post)) return <ErrorMessage message="본인 글만 수정할 수 있습니다." />;
+  if (!canModify(user, post))
+    return (
+      <Container className="py-12">
+        <ErrorMessage message="본인 글만 수정할 수 있습니다." />
+      </Container>
+    );
 
   return (
-    <div className="mx-auto max-w-3xl">
-      <PageHeader title="글 수정" />
+    <Page compact narrow eyebrow="Discussion" title="글 수정">
       <PostForm
         initial={{ title: post.title, body: post.body, category: post.category }}
         submitLabel="저장"
@@ -39,6 +43,6 @@ export function EditPostPage() {
           navigate(`/discussion/${post.id}`, { replace: true });
         }}
       />
-    </div>
+    </Page>
   );
 }

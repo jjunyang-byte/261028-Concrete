@@ -1,16 +1,18 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
-import { PenSquare } from 'lucide-react';
+import { ChevronRight, PenSquare } from 'lucide-react';
 import { discussionService, type Category, type Post } from '../../services';
 import { usePageTitle } from '../../hooks/usePageTitle';
 import {
+  Avatar,
   buttonClass,
   CategoryBadge,
   categoryLabels,
+  EmptyState,
   ErrorMessage,
   errorText,
   formatDate,
-  PageHeader,
+  Page,
   Spinner,
 } from '../../components/ui';
 
@@ -63,52 +65,69 @@ export function DiscussionListPage() {
   }, [category, cursor]);
 
   return (
-    <div>
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <PageHeader title="토론 게시판" description="연구 결과와 수업 내용을 자유롭게 토론하는 공간입니다." />
+    <Page
+      eyebrow="Discussion"
+      title="토론 게시판"
+      description="연구 결과와 수업 내용을 자유롭게 토론하는 공간입니다."
+    >
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+        <div
+          className="inline-flex flex-wrap gap-1 rounded-2xl border border-slate-200/80 bg-white p-1 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+          role="tablist"
+          aria-label="카테고리"
+        >
+          {filters.map((f) => {
+            const active = f === category;
+            return (
+              <button
+                key={f ?? 'all'}
+                role="tab"
+                aria-selected={active}
+                onClick={() => setParams(f ? { category: f } : {})}
+                className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
+                  active
+                    ? 'bg-brand-600 text-white shadow-sm dark:bg-brand-500'
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white'
+                }`}
+              >
+                {f ? categoryLabels[f] : '전체'}
+              </button>
+            );
+          })}
+        </div>
         <Link to="/discussion/new" className={buttonClass.primary}>
           <PenSquare className="h-4 w-4" /> 글쓰기
         </Link>
-      </div>
-
-      <div className="mb-4 flex flex-wrap gap-2" role="tablist" aria-label="카테고리">
-        {filters.map((f) => {
-          const active = f === category;
-          return (
-            <button
-              key={f ?? 'all'}
-              role="tab"
-              aria-selected={active}
-              onClick={() => setParams(f ? { category: f } : {})}
-              className={`rounded-full px-4 py-1.5 text-sm font-medium ${
-                active
-                  ? 'bg-blue-700 text-white dark:bg-blue-600'
-                  : 'bg-white text-slate-700 ring-1 ring-slate-300 hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-300 dark:ring-slate-600'
-              }`}
-            >
-              {f ? categoryLabels[f] : '전체'}
-            </button>
-          );
-        })}
       </div>
 
       {error && <ErrorMessage message={error} />}
       {loading ? (
         <Spinner />
       ) : posts.length === 0 ? (
-        <p className="py-12 text-center text-slate-500">아직 글이 없습니다. 첫 글을 남겨 보세요!</p>
+        <EmptyState>아직 글이 없습니다. 첫 글을 남겨 보세요!</EmptyState>
       ) : (
-        <ul className="divide-y divide-slate-200 overflow-hidden rounded-xl border border-slate-200 bg-white dark:divide-slate-700 dark:border-slate-700 dark:bg-slate-800">
+        <ul className="divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm dark:divide-slate-800 dark:border-slate-800 dark:bg-slate-900">
           {posts.map((p) => (
             <li key={p.id}>
-              <Link to={`/discussion/${p.id}`} className="block px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/50">
-                <div className="flex min-w-0 items-center gap-2">
-                  <CategoryBadge category={p.category} />
-                  <span className="truncate font-medium">{p.title}</span>
+              <Link
+                to={`/discussion/${p.id}`}
+                className={`group flex items-center gap-4 px-5 py-4 transition hover:bg-slate-50 sm:px-6 dark:hover:bg-slate-800/50 ${
+                  p.category === 'notice' ? 'bg-amber-50/40 dark:bg-amber-950/10' : ''
+                }`}
+              >
+                <Avatar name={p.authorName} size="sm" />
+                <div className="min-w-0 flex-1">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <CategoryBadge category={p.category} />
+                    <span className="truncate font-semibold text-slate-900 group-hover:text-brand-700 dark:text-slate-100 dark:group-hover:text-brand-300">
+                      {p.title}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-xs text-slate-500">
+                    {p.authorName} · {formatDate(p.createdAt)}
+                  </p>
                 </div>
-                <p className="mt-1 text-xs text-slate-500">
-                  {p.authorName} · {formatDate(p.createdAt)}
-                </p>
+                <ChevronRight className="h-5 w-5 shrink-0 text-slate-300 transition group-hover:translate-x-0.5 group-hover:text-brand-500" />
               </Link>
             </li>
           ))}
@@ -116,12 +135,12 @@ export function DiscussionListPage() {
       )}
 
       {cursor && !loading && (
-        <div className="mt-6 text-center">
+        <div className="mt-8 text-center">
           <button onClick={loadMore} disabled={loadingMore} className={buttonClass.secondary}>
             {loadingMore ? '불러오는 중…' : '더 보기'}
           </button>
         </div>
       )}
-    </div>
+    </Page>
   );
 }

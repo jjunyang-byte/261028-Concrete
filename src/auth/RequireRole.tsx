@@ -13,7 +13,7 @@ import { Clock, Lock, ShieldAlert } from 'lucide-react';
 import type { Role } from '../services';
 import { useAuth } from './useAuth';
 import { LoginButton } from '../components/LoginButton';
-import { Spinner } from '../components/ui';
+import { Container, Spinner } from '../components/ui';
 
 export function RequireRole({ roles, children }: { roles: Role[]; children: ReactNode }) {
   const { user, loading } = useAuth();
@@ -22,7 +22,7 @@ export function RequireRole({ roles, children }: { roles: Role[]; children: Reac
 
   if (!user) {
     return (
-      <Notice icon={<Lock className="h-8 w-8" />} title="로그인이 필요합니다">
+      <Notice icon={<Lock className="h-7 w-7" />} title="로그인이 필요합니다">
         <p>이 페이지는 연구실 구성원만 이용할 수 있습니다. 로그인해 주세요.</p>
         <div className="mt-4 flex justify-center">
           <LoginButton />
@@ -35,7 +35,7 @@ export function RequireRole({ roles, children }: { roles: Role[]; children: Reac
 
   if (user.role === 'pending') {
     return (
-      <Notice icon={<Clock className="h-8 w-8" />} title="교수님 승인 대기 중입니다">
+      <Notice icon={<Clock className="h-7 w-7" />} title="교수님 승인 대기 중입니다">
         <p>가입 신청이 접수되었습니다. 교수님이 승인하시면 게시판을 이용할 수 있습니다.</p>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">({user.email})</p>
       </Notice>
@@ -43,7 +43,7 @@ export function RequireRole({ roles, children }: { roles: Role[]; children: Reac
   }
 
   return (
-    <Notice icon={<ShieldAlert className="h-8 w-8" />} title="접근 권한이 없습니다">
+    <Notice icon={<ShieldAlert className="h-7 w-7" />} title="접근 권한이 없습니다">
       <p>이 페이지는 관리자만 이용할 수 있습니다.</p>
     </Notice>
   );
@@ -51,10 +51,14 @@ export function RequireRole({ roles, children }: { roles: Role[]; children: Reac
 
 function Notice({ icon, title, children }: { icon: ReactNode; title: string; children: ReactNode }) {
   return (
-    <div className="mx-auto max-w-lg rounded-xl border border-slate-200 bg-white p-8 text-center dark:border-slate-700 dark:bg-slate-800">
-      <div className="mb-3 flex justify-center text-blue-700 dark:text-blue-400">{icon}</div>
-      <h2 className="mb-2 text-xl font-bold">{title}</h2>
-      <div className="text-slate-600 dark:text-slate-300">{children}</div>
-    </div>
+    <Container className="py-20 sm:py-28">
+      <div className="animate-fade-up mx-auto max-w-md rounded-3xl border border-slate-200/80 bg-white p-10 text-center shadow-xl shadow-slate-900/5 dark:border-slate-800 dark:bg-slate-900">
+        <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-linear-to-br from-brand-500 to-brand-800 text-white shadow-lg shadow-brand-900/20">
+          {icon}
+        </div>
+        <h2 className="mb-2 text-xl font-bold tracking-tight">{title}</h2>
+        <div className="leading-relaxed text-slate-600 dark:text-slate-400">{children}</div>
+      </div>
+    </Container>
   );
 }
