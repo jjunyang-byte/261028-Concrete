@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from 'react';
 import { ChevronDown, LogIn } from 'lucide-react';
 import { useAuth } from '../auth/useAuth';
 import { authService } from '../services';
-import { buttonClass } from './ui';
+import { buttonClass, errorText } from './ui';
 
 export function LoginButton({ onDone }: { onDone?: () => void }) {
   const { signIn } = useAuth();
@@ -35,6 +35,8 @@ export function LoginButton({ onDone }: { onDone?: () => void }) {
       await signIn(role);
       setOpen(false);
       onDone?.();
+    } catch (e) {
+      alert(errorText(e));
     } finally {
       setBusy(false);
     }
