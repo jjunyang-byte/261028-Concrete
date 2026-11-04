@@ -1,0 +1,14 @@
+# Netlify 배포 설정 파일입니다. 보통은 고칠 필요가 없습니다.
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+# 주소창에 /research 처럼 직접 입력하거나 새로고침해도
+# 404가 나지 않도록 모든 주소를 index.html로 보내 줍니다. (SPA 리다이렉트)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

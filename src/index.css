@@ -1,0 +1,13 @@
+@import 'tailwindcss';
+
+/* 다크 모드: <html class="dark"> 일 때 dark: 스타일 적용 */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  html {
+    font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
+  }
+  body {
+    @apply bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-slate-100;
+  }
+}
