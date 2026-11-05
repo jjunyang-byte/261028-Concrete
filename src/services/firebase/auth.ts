@@ -137,7 +137,7 @@ export const firebaseAuthService: AuthService = {
         if (e.code === 'auth/network-request-failed')
           throw new Error('네트워크 오류로 로그인하지 못했습니다. 인터넷 연결을 확인해 주세요.');
         if (e.code === 'auth/invalid-api-key' || e.code === 'auth/api-key-not-valid.-please-pass-a-valid-api-key.')
-          throw new Error('Firebase API 키가 올바르지 않습니다. Netlify 환경변수 VITE_FIREBASE_API_KEY 값을 확인해 주세요.');
+          throw new Error('Firebase API 키가 올바르지 않습니다. Netlify의 Site configuration → Environment variables에서 VITE_FIREBASE_로 시작하는 변수를 모두 지운 뒤 다시 배포해 주세요.');
       }
       console.error('[로그인] 구글 로그인 실패', e);
       throw new Error(`로그인하지 못했습니다. (${e instanceof FirebaseError ? e.code : '알 수 없는 오류'})`);

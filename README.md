@@ -126,11 +126,15 @@ npm run dev
    - Publish directory: `dist`
 4. 이후에는 GitHub에 변경이 올라갈 때마다 자동으로 다시 배포됩니다.
 
-Firebase 설정 값은 `.env.production` 파일에 들어 있어서 **Netlify에 환경변수를 따로 넣지 않아도 됩니다.**
+**Netlify에는 환경변수를 넣지 않는 것을 권장합니다.**
+Firebase 설정 값(concrete-7fb71 프로젝트)은 코드(`src/services/firebase/app.ts`)와 `.env.production`에 이미 들어 있습니다.
 (이 값들은 비밀번호가 아니라 원래 브라우저에 공개되는 값입니다. 데이터는 보안 규칙이 지킵니다.)
-다만 Netlify에서 값을 관리하고 싶다면 아래 방법으로 넣을 수 있고, **Netlify에 넣은 값이 `.env.production`보다 우선**합니다.
 
-### Netlify 환경변수 설정 방법 (선택)
+> 이미 Netlify에 `VITE_FIREBASE_...` 변수를 넣으셨다면, 지워도 되고 그대로 두어도 됩니다.
+> 프로젝트 ID가 `concrete-7fb71`이면 사이트는 Netlify 값 대신 코드에 들어 있는 올바른 값을 쓰므로, 오타가 있어도 영향이 없습니다.
+> 아래 방법은 나중에 **다른 Firebase 프로젝트로 옮길 때만** 필요합니다.
+
+### Netlify 환경변수 설정 방법 (다른 Firebase 프로젝트로 옮길 때만)
 
 **넣을 값 (5개)**
 
